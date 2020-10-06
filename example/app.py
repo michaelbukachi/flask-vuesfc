@@ -28,6 +28,11 @@ def create_app():
         component = render_vue_component('index2.vue')
         return render_template('example.html', component=component)
 
+    @app.route('/example3')
+    def example3():
+        component = render_vue_component('index3.vue')
+        return render_template('example.html', component=component)
+
     return app
 
 

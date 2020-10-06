@@ -47,6 +47,7 @@ def render_vue_component(template_name):
     parsed = ctx.g.v8.call('VueTemplateCompiler.parseComponent', vue)
     template = f'<div id="{app_id}">{parsed["template"]["content"]}</div>'
     delimiter_replaced = False
+    prefix = None
 
     # Replace {{ }} with [[ ]] so that vue js syntax is not touched by jinja
     if '{{' in template:
@@ -57,6 +58,11 @@ def render_vue_component(template_name):
     component += (html_minify(template) + '\n')
 
     js_script = parsed['script']['content']
+    sections = js_script.split('export default')
+    if len(sections) == 2:
+        first = sections[0].strip()
+        if first:
+            prefix = first
     js_script = re.findall(r'export default\s*{(.*)}', js_script, re.DOTALL | re.MULTILINE)[0].strip()
     js_script = f'el: \'#{app_id}\',\n' + js_script
 
@@ -64,6 +70,9 @@ def render_vue_component(template_name):
         js_script = 'delimiters: [\'[[\', \']]\'],' + js_script
 
     js_script = 'new Vue({' + js_script + '})'
+    if prefix:
+        js_script = prefix + '\n' + js_script
+
     js_script = '<script>' + js_minify_keep_comments(js_script) + '</script>'
 
     component += (js_script + '\n')

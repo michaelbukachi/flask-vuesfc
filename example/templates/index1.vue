@@ -1,12 +1,17 @@
 <template>
   <div class="example">{{ message }}</div>
+  <div class="example">{{ anotherMessage }}</div>
 </template>
 <script>
+const foo = 'bar'
+
+
 export default  {
   name: 'App',
   data() {
     return {
-      message: 'Vue example'
+      message: 'Vue example',
+      anotherMessage: foo
     }
   }
 }
