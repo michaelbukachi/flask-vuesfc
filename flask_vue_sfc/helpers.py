@@ -128,7 +128,6 @@ def _render_component(template_name, is_child=False, child_component_name=None):
 def render_vue_component(template_name, **context):
     is_page = context.get('is_page', False)
     component = _render_component(template_name)
-    print(component)
     if is_page:
         return render_template('page.html', component=component)
     return component
