@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 
 from flask_vue_sfc import VueSFC
-from flask_vue_sfc.helpers import render_vue_component
+from flask_vue_sfc.helpers import render_vue_component, render_vue_page
 
 
 class Config:
@@ -32,6 +32,10 @@ def create_app():
     def example3():
         component = render_vue_component('index3.vue')
         return render_template('example.html', component=component)
+
+    @app.route('/example4')
+    def example4():
+        return render_vue_page('index1.vue')
 
     return app
 

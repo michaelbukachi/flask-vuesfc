@@ -19,13 +19,13 @@ class VueSFC:
     def init_app(self, app):
         if not hasattr(app, 'extensions'):
             app.extensions = {}
-        app.extensions['vue_ssr'] = self
+        app.extensions['vue_sfc'] = self
 
-        blueprint = Blueprint('vue_ssr', __name__, template_folder='templates',
-                              static_folder='static', static_url_path='/vue_ssr' + app.static_url_path)
+        blueprint = Blueprint('vue_sfc', __name__, template_folder='templates',
+                              static_folder='static', static_url_path='/vue_sfc' + app.static_url_path)
         app.register_blueprint(blueprint)
 
-        app.jinja_env.globals['vue_ssr'] = self
+        app.jinja_env.globals['vue_sfc'] = self
 
         app.config.setdefault('VUE_SERVE_LOCAL', False)
         app.config.setdefault('VUE_USE_MINIFIED', True)
@@ -54,7 +54,7 @@ class VueSFC:
             js_filename = 'js/vue.js'
 
         if serve_local:
-            js = '<script src="%s"></script>' % url_for('vue_ssr.static', filename=js_filename)
+            js = '<script src="%s"></script>' % url_for('vue_sfc.static', filename=js_filename)
         else:
             js = f'<script src="https://cdn.jsdelivr.net/npm/vue@{version}"></script>'
 

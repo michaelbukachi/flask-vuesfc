@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Page{% endblock %}</title>
+</head>
+<body>
+<script src="{{ url_for('vue_sfc.static', filename='js/vue.min.js') }}"></script>
+{% block body %}
+{{ component|safe }}
+{% endblock %}
+{% block js_scripts %}
+{% endblock %}
+</body>
+</html>
