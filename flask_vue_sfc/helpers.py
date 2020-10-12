@@ -5,24 +5,9 @@ from css_html_js_minify import html_minify, css_minify
 from css_html_js_minify.js_minifier import js_minify_keep_comments
 from flask import render_template
 from flask.globals import _app_ctx_stack
-from jinja2 import FileSystemLoader
 from tinycss2 import parse_stylesheet
 
-
-class VueLoader(FileSystemLoader):
-
-    def get_source(self, environment, template):
-        if template and template.lower().endswith('.vue'):
-            # We don't want jinja to touch  {{ }}
-            contents, filename, uptodate = super(VueLoader, self).get_source(environment, template)
-            contents = '{% raw %}\n' + contents.replace('</template>', '</template>\n{% endraw %}')
-            return contents, filename, uptodate
-        return super(VueLoader, self).get_source(environment, template)
-
-
-def _get_file_contents(path):
-    with open(path, 'r') as fp:
-        return fp.read()
+from flask_vue_sfc.utils import VueScript, ChildVueScript
 
 
 def _create_random_id():
@@ -71,17 +56,22 @@ def _render_component(template_name, is_child=False, child_component_name=None):
         template = template.replace('}}', ']]')
         delimiter_replaced = True
 
+    if is_child:
+        script = ChildVueScript(parsed['script']['content'])
+    else:
+        script = VueScript(parsed['script']['content'])
+
     js_script = parsed['script']['content']
 
-    child_imports = re.findall(r'import.*(?:[V|v]ue).*', js_script)
-    for imp in child_imports:
-        template_name = _get_template_name_from_import(imp)
-        if not template_name:
-            continue
-        component_name = _get_component_name(imp)
-        child_component = _render_component(template_name, True, component_name)
-        component += (child_component + '\n')
-        js_script = js_script.replace(imp, '')
+    # child_imports = re.findall(r'import.*(?:[V|v]ue).*', js_script)
+    # for imp in child_imports:
+    #     template_name = _get_template_name_from_import(imp)
+    #     if not template_name:
+    #         continue
+    #     component_name = _get_component_name(imp)
+    #     child_component = _render_component(template_name, True, component_name)
+    #     component += (child_component + '\n')
+    #     js_script = js_script.replace(imp, '')
 
     component += (html_minify(template) + '\n')
 

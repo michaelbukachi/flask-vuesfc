@@ -5,8 +5,8 @@
   <inner-hello></inner-hello>
 </template>
 <script>
-import Hello from 'Hello.Vue'
-import InnerHello from 'nested/InnerHello.vue'
+import Hello from './Hello.Vue'
+import InnerHello from './nested/InnerHello'
 
 const foo = 'bar'
 

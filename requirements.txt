@@ -1,3 +1,5 @@
 py-mini-racer==0.4.0
 css-html-js-minify==2.5.5
 tinycss2==1.0.2
+esprima==4.0.1
+lxml==4.5.2

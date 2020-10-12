@@ -4,7 +4,7 @@ from flask import g, Blueprint, current_app, url_for
 from markupsafe import Markup
 from py_mini_racer import py_mini_racer
 
-from flask_vue_sfc.helpers import _get_file_contents, VueLoader
+from flask_vue_sfc.utils import VueLoader, _get_file_contents
 
 VERSION_VUE = '2.6.12'
 STATIC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
@@ -39,6 +39,8 @@ class VueSFC:
 
             vue_tc_filepath = os.path.join(STATIC_DIR, 'js', 'vue-template-compiler.js')
             g.v8.eval(_get_file_contents(vue_tc_filepath))
+            escodegen_filepath = os.path.join(STATIC_DIR, 'js', 'escodegen.js')
+            g.v8.eval(_get_file_contents(escodegen_filepath))
 
         @app.teardown_appcontext
         def teardown_v8_engine(exc):
