@@ -3,8 +3,7 @@ import os
 import esprima
 from css_html_js_minify import html_minify
 from esprima.nodes import Module, ExportDefaultDeclaration, Property, ImportDeclaration, Identifier, Literal, \
-    ExpressionStatement, NewExpression, CallExpression, StaticMemberExpression
-from lxml import etree
+    ExpressionStatement, NewExpression, CallExpression, StaticMemberExpression, ArrayExpression
 from py_mini_racer import py_mini_racer
 from jinja2 import FileSystemLoader
 
@@ -112,6 +111,21 @@ class VueScript:
             shorthand=False
         )
 
+    def get_delimiter_property(self):
+        return Property(
+            kind='init',
+            key=Identifier('delimiters'),
+            computed=False,
+            method=False,
+            value=ArrayExpression(
+                [
+                    Literal('[[', "'[['"),
+                    Literal(']]', "']]'"),
+                ]
+            ),
+            shorthand=False
+        )
+
     def get_vue_container(self):
         return ExpressionStatement(
             NewExpression(
@@ -136,7 +150,8 @@ class VueScript:
                 vue_app = self.get_vue_container().toDict()
                 obj = declaration.declaration.toDict()
                 prop = self.get_identifier_property()
-                new_properties = [prop.toDict()]
+                delimiter_prop = self.get_delimiter_property()
+                new_properties = [prop.toDict(), delimiter_prop.toDict()]
                 for prop in obj['properties']:
                     if prop['key']['name'] == 'components':  # Skip components property
                         continue
@@ -147,7 +162,6 @@ class VueScript:
                 new_body.append(vue_app)
             else:
                 new_body.append(declaration.toDict())
-
         new_parsed_obj = {
             'type': 'Program',
             'sourceType': 'module',
@@ -190,9 +204,17 @@ class VueComponent(VueScript):
         self.html = html
 
     def render_html(self):
-        root = etree.Element('div', id=self.app_id)
-        root.append(etree.fromstring(self.html))
-        return html_minify(etree.tostring(root).decode('utf-8'))
+        html = (
+            f'<div id="{self.app_id}">'
+            f'{self.html}'
+            '</div>'
+        )
+        html = html_minify(html)
+        # Handler delimiters replacement to prevent conflicts with jinja
+        if '{{' in html:
+            html = html.replace('{{', '[[')
+            html = html.replace('}}', ']]')
+        return html
 
     def render(self, v8=None):
         components = self.child_components()
@@ -216,11 +238,19 @@ class VueChildComponent(ChildVueScript):
         self.html = html
 
     def render_html(self):
-        root = etree.Element('script', type='text/x-template', id=f'{self.app_id}-template')
-        child = etree.Element('div', id=self.app_id)
-        child.append(etree.fromstring(self.html))
-        root.append(child)
-        return html_minify(etree.tostring(root).decode('utf-8'))
+        html = (
+            f'<script type="text/x-template" id="{self.app_id}-template">'
+            f'<div id="{self.app_id}">'
+            f'{self.html}'
+            '</div>'
+            '</script>'
+        )
+        html = html_minify(html)
+        # Handler delimiters replacement to prevent conflicts with jinja
+        if '{{' in html:
+            html = html.replace('{{', '[[')
+            html = html.replace('}}', ']]')
+        return html
 
     def render(self, v8=None):
         components = self.child_components()
