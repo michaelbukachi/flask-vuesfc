@@ -27,8 +27,15 @@ setup(
     include_package_data=True,
     platforms='any',
     install_requires=[
-        'Flask>=0.11'
+        'Flask>=0.11',
+        'py-mini-racer>=0.4.0',
+        'tinycss2>=1.0.2',
+        'esprima>=4.0.2',
+        'css-html-js-minify'
     ],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
+    python_requires='>=3.4',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

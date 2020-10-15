@@ -21,6 +21,7 @@ def test_render_css():
     template.app_id = '1'
     assert template.render_css() == '#1 .example{font-weight:bold}'
 
+
 def test_render_vue_component__no_child():
     script = '''
     export default {
@@ -148,13 +149,17 @@ def test_render_vue_child_component__with_child():
 def test_render_sfc__no_child():
     script = "new Vue({el:'#1',name:'Test',data(){return{message:'test'}}})"
     html = '<div id=1 ><div class=example >[[message]]</div></div>'
-    sfc = SFC(html, script)
+    css = '#1 .example{font-weight:bold}'
+    sfc = SFC(html, script, css)
     expected = (
         "\n"
         "<div id=1 ><div class=example >[[message]]</div></div>\n"
         "<script>\n"
         "new Vue({el:'#1',name:'Test',data(){return{message:'test'}}})\n"
         "</script>\n"
+        "<style>\n"
+        "#1 .example{font-weight:bold}\n"
+        "</style>\n"
     )
     assert str(sfc) == expected
 
@@ -162,10 +167,11 @@ def test_render_sfc__no_child():
 def test_render_sfc__with_child():
     script = "new Vue({el:'#1',name:'Test',data(){return{message:'test'}}})"
     html = '<div id=1 ><div class=example >[[message]]</div></div>'
+    css = '#1 .example{font-weight:bold}'
     child_script = "Vue.component('Test',{template:'#1-template',name:'Test',data(){return{message:'test'}}})"
     child_html = '<script type="text/x-template" id=1-template ><div id=1 ><div class=example >[[message]]</div></div></script>'
     child_sfc = SFC(child_html, child_script)
-    sfc = SFC(html, script, children=[child_sfc])
+    sfc = SFC(html, script, css, children=[child_sfc])
     expected = (
         "\n"
         '<script type="text/x-template" id=1-template ><div id=1 ><div class=example >[[message]]</div></div></script>\n'
@@ -174,5 +180,8 @@ def test_render_sfc__with_child():
         "Vue.component('Test',{template:'#1-template',name:'Test',data(){return{message:'test'}}})\n"
         "new Vue({el:'#1',name:'Test',data(){return{message:'test'}}})\n"
         '</script>\n'
+        "<style>\n"
+        "#1 .example{font-weight:bold}\n"
+        "</style>\n"
     )
     assert str(sfc) == expected

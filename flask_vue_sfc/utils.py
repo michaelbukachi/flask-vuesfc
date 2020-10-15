@@ -25,9 +25,9 @@ class VueLoader(FileSystemLoader):
 class SFC:
 
     def __init__(self, html, script, css=None, children=None):
-        self.html = html
-        self.script = script
-        self.css = css
+        self.html = html or ''
+        self.script = script or ''
+        self.css = css or ''
         self.children = children
 
     def scripts_to_string(self):
@@ -46,8 +46,29 @@ class SFC:
         output += (self.html + '\n')
         return output
 
+    def styling_to_string(self):
+        output = ''
+        if self.children:
+            for child in self.children:
+                output += child.styling_to_string()
+        output += (self.css + '\n')
+        return output
+
     def __str__(self):
-        return '\n' + self.html_to_string() + '<script>\n' + self.scripts_to_string() + '</script>\n'
+        final_str = '\n'
+        html = self.html_to_string()
+        if html.strip():
+            final_str += html
+
+        script = self.scripts_to_string()
+
+        if script.strip():
+            final_str += ('<script>\n' + script.strip() + '\n</script>\n')
+
+        styling = self.styling_to_string()
+        if styling.strip():
+            final_str += ('<style>\n' + styling.strip() + '\n</style>\n')
+        return final_str
 
 
 class VueScript:
@@ -203,12 +224,12 @@ class HtmlTemplate:
 
     def __init__(self, html, **kwargs):
         super(HtmlTemplate, self).__init__(**kwargs)
-        self.__html = html
+        self._html = html
 
     def render_html(self):
         html = (
             f'<div id="{self.app_id}">'
-            f'{self.__html}'
+            f'{self._html}'
             '</div>'
         )
         html = html_minify(html)
@@ -221,14 +242,14 @@ class HtmlTemplate:
 
 class ChildHtmlTemplate(HtmlTemplate):
 
-    def __init__(self, *args, **kwargs):
-        super(ChildHtmlTemplate, self).__init__(*args, **kwargs)
+    def __init__(self, html, **kwargs):
+        super(ChildHtmlTemplate, self).__init__(html=html, **kwargs)
 
     def render_html(self):
         html = (
             f'<script type="text/x-template" id="{self.app_id}-template">'
             f'<div id="{self.app_id}">'
-            f'{self.html}'
+            f'{self._html}'
             '</div>'
             '</script>'
         )
@@ -253,7 +274,7 @@ class CssStyling:
         for style in self.styles:
             rules = parse_stylesheet(style, True, True)
             for rule in rules:
-                final_css += (f'#{self.app_id} ' + rule.serialize() + '\n')
+                final_css += (f'{self.styling_prefix} ' + rule.serialize() + '\n')
 
         return css_minify(final_css, noprefix=True)
 
@@ -264,6 +285,7 @@ class VueComponent(VueScript, HtmlTemplate, CssStyling):
         super(VueComponent, self).__init__(html=src.get('html'), script=src.get('script'), styles=src.get('styles'),
                                            id_generator=id_generator, child_component_loader=child_component_loader)
         self.app_id = id_generator()
+        self.styling_prefix = f'#{self.app_id}'
 
     def render(self, v8=None):
         components = self.child_components()
@@ -272,7 +294,7 @@ class VueComponent(VueScript, HtmlTemplate, CssStyling):
             children = []
             for key, val in components.items():
                 src = self.child_component_loader(val)
-                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader)
+                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader, self.styling_prefix)
                 children.append(child.render(v8))
         html = self.render_html()
         script = self.render_script(v8)
@@ -282,11 +304,13 @@ class VueComponent(VueScript, HtmlTemplate, CssStyling):
 
 class VueChildComponent(ChildVueScript, ChildHtmlTemplate, CssStyling):
 
-    def __init__(self, name, src, id_generator, child_component_loader=None):
-        super(VueChildComponent, self).__init__(name=name, html=src.get('html'), script=src.get('script'), styles=src.get('styles'),
-                                                id_generator=id_generator, child_component_loader=child_component_loader)
+    def __init__(self, name, src, id_generator, child_component_loader=None, styling_prefix=None):
+        super(VueChildComponent, self).__init__(name=name, html=src.get('html'), script=src.get('script'),
+                                                styles=src.get('styles'),
+                                                id_generator=id_generator,
+                                                child_component_loader=child_component_loader)
         self.app_id = id_generator()
-        self.html = src['html']
+        self.styling_prefix = f'{styling_prefix} #{self.app_id}' if styling_prefix else f'#{self.app_id}'
 
     def render(self, v8=None):
         components = self.child_components()
@@ -295,7 +319,7 @@ class VueChildComponent(ChildVueScript, ChildHtmlTemplate, CssStyling):
             children = []
             for key, val in components.items():
                 src = self.child_component_loader(val)
-                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader)
+                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader, self.styling_prefix)
                 children.append(child.render(v8))
         html = self.render_html()
         script = self.render_script(v8)
