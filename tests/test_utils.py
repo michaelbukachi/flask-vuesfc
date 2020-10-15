@@ -2,16 +2,24 @@ from flask_vue_sfc.utils import VueComponent, VueChildComponent, SFC
 
 
 def test_render_html():
-    template = VueComponent('<div class="example">[[message]]</div>', '', lambda: 1)
+    src = dict(html='<div class="example">[[message]]</div>', script='')
+    template = VueComponent(src, lambda: 1)
     template.app_id = '1'
     assert template.render_html() == '<div id=1 ><div class=example >[[message]]</div></div>'
 
 
 def test_render_child_html():
-    template = VueChildComponent('Test', '<div class="example">[[message]]</div>', '', lambda: 1)
+    src = dict(html='<div class="example">[[message]]</div>', script='')
+    template = VueChildComponent('Test', src, lambda: 1)
     template.app_id = '1'
     assert template.render_html() == '<script type="text/x-template" id=1-template ><div id=1 ><div class=example >[[message]]</div></div></script>'
 
+
+def test_render_css():
+    src = dict(html='<div class="example">[[message]]</div>', script='', styles=['.example {\n font-weight: bold;\n}'])
+    template = VueComponent(src, lambda: 1)
+    template.app_id = '1'
+    assert template.render_css() == '#1 .example{font-weight:bold}'
 
 def test_render_vue_component__no_child():
     script = '''
@@ -24,7 +32,8 @@ def test_render_vue_component__no_child():
       }
     }
     '''
-    component = VueComponent('<div class="example">[[message]]</div>', script, lambda: '1')
+    src = dict(html='<div class="example">[[message]]</div>', script=script)
+    component = VueComponent(src, lambda: '1')
     sfc = component.render()
     assert isinstance(sfc, SFC)
     assert sfc.script == "new Vue({el:'#1',delimiters:['[[',']]'],name:'Test',data(){return{message:'test'}}})"
@@ -43,7 +52,8 @@ def test_render_vue_child_component__no_child():
       }
     }
     '''
-    component = VueChildComponent('Test', '<div class="example">[[message]]</div>', script, lambda: '1')
+    src = dict(html='<div class="example">[[message]]</div>', script=script)
+    component = VueChildComponent('Test', src, lambda: '1')
     sfc = component.render()
     assert isinstance(sfc, SFC)
     assert sfc.script == "Vue.component('Test',{template:'#1-template',delimiters:['[[',']]'],name:'Test',data(){return{message:'test'}}})"
@@ -80,9 +90,10 @@ def test_render_vue_component__with_child():
     '''
 
     def child_component_loader(template_name):
-        return child_html, child_script
+        return dict(html=child_html, script=child_script)
 
-    component = VueComponent('<div class="example">[[message]]</div>', script, lambda: '1', child_component_loader)
+    src = dict(html='<div class="example">[[message]]</div>', script=script)
+    component = VueComponent(src, lambda: '1', child_component_loader)
     sfc = component.render()
     assert sfc.children is not None
     assert isinstance(sfc.children[0], SFC)
@@ -121,10 +132,10 @@ def test_render_vue_child_component__with_child():
     '''
 
     def child_component_loader(template_name):
-        return child_html, child_script
+        return dict(html=child_html, script=child_script)
 
-    component = VueChildComponent('Test', '<div class="example">[[message]]</div>', script, lambda: '1',
-                                  child_component_loader)
+    src = dict(html='<div class="example">[[message]]</div>', script=script)
+    component = VueChildComponent('Test', src, lambda: '1', child_component_loader)
     sfc = component.render()
     assert sfc.children is not None
     assert isinstance(sfc.children[0], SFC)

@@ -1,11 +1,12 @@
 import os
 
 import esprima
-from css_html_js_minify import html_minify
+from css_html_js_minify import html_minify, css_minify
 from esprima.nodes import Module, ExportDefaultDeclaration, Property, ImportDeclaration, Identifier, Literal, \
     ExpressionStatement, NewExpression, CallExpression, StaticMemberExpression, ArrayExpression
 from py_mini_racer import py_mini_racer
 from jinja2 import FileSystemLoader
+from tinycss2 import parse_stylesheet
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 
@@ -23,9 +24,10 @@ class VueLoader(FileSystemLoader):
 
 class SFC:
 
-    def __init__(self, html, script, children=None):
+    def __init__(self, html, script, css=None, children=None):
         self.html = html
         self.script = script
+        self.css = css
         self.children = children
 
     def scripts_to_string(self):
@@ -50,7 +52,8 @@ class SFC:
 
 class VueScript:
 
-    def __init__(self, script, id_generator, child_component_loader=None):
+    def __init__(self, script, id_generator, child_component_loader=None, **kwargs):
+        super(VueScript, self).__init__(**kwargs)
         self.script = script
         self.id_generator = id_generator
         self.child_component_loader = child_component_loader
@@ -196,17 +199,16 @@ class ChildVueScript(VueScript):
         )
 
 
-class VueComponent(VueScript):
+class HtmlTemplate:
 
-    def __init__(self, html, script, id_generator, child_component_loader=None):
-        super(VueComponent, self).__init__(script=script, id_generator=id_generator, child_component_loader=child_component_loader)
-        self.app_id = id_generator()
-        self.html = html
+    def __init__(self, html, **kwargs):
+        super(HtmlTemplate, self).__init__(**kwargs)
+        self.__html = html
 
     def render_html(self):
         html = (
             f'<div id="{self.app_id}">'
-            f'{self.html}'
+            f'{self.__html}'
             '</div>'
         )
         html = html_minify(html)
@@ -216,26 +218,11 @@ class VueComponent(VueScript):
             html = html.replace('}}', ']]')
         return html
 
-    def render(self, v8=None):
-        components = self.child_components()
-        children = None
-        if components:
-            children = []
-            for key, val in components.items():
-                child_html, child_script = self.child_component_loader(val)
-                child = VueChildComponent(key, child_html, child_script, self.id_generator, self.child_component_loader)
-                children.append(child.render(v8))
-        html = self.render_html()
-        script = self.render_script(v8)
-        return SFC(html, script, children)
 
+class ChildHtmlTemplate(HtmlTemplate):
 
-class VueChildComponent(ChildVueScript):
-
-    def __init__(self, name, html, script, id_generator, child_component_loader=None):
-        super(VueChildComponent, self).__init__(name=name, script=script, id_generator=id_generator, child_component_loader=child_component_loader)
-        self.app_id = id_generator()
-        self.html = html
+    def __init__(self, *args, **kwargs):
+        super(ChildHtmlTemplate, self).__init__(*args, **kwargs)
 
     def render_html(self):
         html = (
@@ -252,18 +239,68 @@ class VueChildComponent(ChildVueScript):
             html = html.replace('}}', ']]')
         return html
 
+
+class CssStyling:
+
+    def __init__(self, styles, **kwargs):
+        super(CssStyling, self).__init__(**kwargs)
+        if styles is None:
+            styles = []
+        self.styles = styles
+
+    def render_css(self):
+        final_css = ''
+        for style in self.styles:
+            rules = parse_stylesheet(style, True, True)
+            for rule in rules:
+                final_css += (f'#{self.app_id} ' + rule.serialize() + '\n')
+
+        return css_minify(final_css, noprefix=True)
+
+
+class VueComponent(VueScript, HtmlTemplate, CssStyling):
+
+    def __init__(self, src, id_generator, child_component_loader=None):
+        super(VueComponent, self).__init__(html=src.get('html'), script=src.get('script'), styles=src.get('styles'),
+                                           id_generator=id_generator, child_component_loader=child_component_loader)
+        self.app_id = id_generator()
+
     def render(self, v8=None):
         components = self.child_components()
         children = None
         if components:
             children = []
             for key, val in components.items():
-                child_html, child_script = self.child_component_loader(val)
-                child = VueChildComponent(key, child_html, child_script, self.id_generator, self.child_component_loader)
+                src = self.child_component_loader(val)
+                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader)
                 children.append(child.render(v8))
         html = self.render_html()
         script = self.render_script(v8)
-        return SFC(html, script, children)
+        css = self.render_css()
+        return SFC(html, script, css, children)
+
+
+class VueChildComponent(ChildVueScript, ChildHtmlTemplate, CssStyling):
+
+    def __init__(self, name, src, id_generator, child_component_loader=None):
+        super(VueChildComponent, self).__init__(name=name, html=src.get('html'), script=src.get('script'), styles=src.get('styles'),
+                                                id_generator=id_generator, child_component_loader=child_component_loader)
+        self.app_id = id_generator()
+        self.html = src['html']
+
+    def render(self, v8=None):
+        components = self.child_components()
+        children = None
+        if components:
+            children = []
+            for key, val in components.items():
+                src = self.child_component_loader(val)
+                child = VueChildComponent(key, src, self.id_generator, self.child_component_loader)
+                children.append(child.render(v8))
+        html = self.render_html()
+        script = self.render_script(v8)
+        css = self.render_css()
+        return SFC(html, script, css, children)
 
 
 def _get_file_contents(path):

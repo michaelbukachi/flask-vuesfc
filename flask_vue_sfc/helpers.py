@@ -1,9 +1,7 @@
-import re
 import secrets
 
 from flask import render_template
 from flask.globals import _app_ctx_stack
-from tinycss2 import parse_stylesheet
 
 from flask_vue_sfc.utils import VueComponent
 
@@ -12,42 +10,25 @@ def _create_random_id():
     return 'vue-sfc-' + secrets.token_hex(6)
 
 
-def _parse_stylesheet(app_id, css):
-    rules = parse_stylesheet(css, True, True)
-    final_css = '<style>\n'
-    for rule in rules:
-        final_css += (f'#{app_id} ' + rule.serialize() + '\n')
-    final_css += '</style>'
-    return final_css
-
-
-def _get_template_name_from_import(import_str):
-    matches = re.findall(r"^.*['\"](.*)['\"]", import_str)
-    if matches:
-        return matches[0]
-    return None
-
-
-def _get_template_as_html_and_script(template_name):
+def _load_template(template_name):
     ctx = _app_ctx_stack.top
     t = ctx.app.jinja_env.get_or_select_template(template_name)
     vue = t.render()
     parsed = ctx.g.v8.call('VueTemplateCompiler.parseComponent', vue)
-    html = parsed['template']['content']
-    script = parsed['script']['content']
 
-    return html, script
+    component = {
+        'html': parsed['template']['content'],
+        'script': parsed['script']['content'],
+        'style': [style['content'] for style in parsed['styles']]
+    }
 
-
-def _get_component_name(import_str):
-    matches = re.findall(r'import\s*(\w+)\s*.*', import_str)
-    return matches[0]
+    return component
 
 
 def _render_component(template_name):
     ctx = _app_ctx_stack.top
-    html, script = _get_template_as_html_and_script(template_name)
-    component = VueComponent(html, script, _create_random_id, _get_template_as_html_and_script)
+    src = _load_template(template_name)
+    component = VueComponent(src, _create_random_id, _load_template)
     sfc = component.render(ctx.g.v8)
 
     # styles = parsed['styles']
