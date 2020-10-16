@@ -1,16 +1,16 @@
 ===============
-Flask-Vue-SFC
+Flask-VueSFC
 ===============
-.. image:: https://img.shields.io/pypi/v/Flask-Vue-SFC.svg
-    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
-.. image:: https://img.shields.io/pypi/l/Flask-Vue.svg
-    :target: https://pypi.python.org/pypi/Flask-Vue-SFC
-.. image:: https://img.shields.io/pypi/pyversions/Flask-Vue-SFC.svg
-    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
-.. image:: https://img.shields.io/pypi/status/Flask-Vue-SFC.svg
-    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
+.. image:: https://img.shields.io/pypi/v/Flask-VueSFC.svg
+    :target: https://pypi.python.org/pypi/Flask-VueSFC/
+.. image:: https://img.shields.io/pypi/l/Flask-VueSFC.svg
+    :target: https://pypi.python.org/pypi/Flask-VueSFC
+.. image:: https://img.shields.io/pypi/pyversions/Flask-VueSFC.svg
+    :target: https://pypi.python.org/pypi/Flask-VueSFC/
+.. image:: https://img.shields.io/pypi/status/Flask-VueSFC.svg
+    :target: https://pypi.python.org/pypi/Flask-VueSFC/
 
-Flask-Vue-SFC is a Flask extension that translates and renders `Vue.js
+Flask-VueSFC is a Flask extension that translates and renders `Vue.js
 <http://vuejs.org>`_ Single File Components.
 
 In short, it translates code like this ::
@@ -89,6 +89,12 @@ Current time is: **Friday, October 16th 2020, 2:35:27 am**
 ======
 Usage
 ======
+
+Install it with ::
+
+  pip install Flask-VueSFC
+
+
 Here's an example on how to use the extension ::
 
   from flask_vue_sfc import VueSFC

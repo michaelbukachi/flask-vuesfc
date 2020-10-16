@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-Flask-Vue-SFC
+Flask-VueSFC
 -------------
 Flask extension for rendering Vue.js SFCs
 """
@@ -11,10 +11,10 @@ except:
 
 import codecs
 
-version = '0.0.3'
+version = '0.0.4'
 
 setup(
-    name='Flask-Vue-SFC',
+    name='Flask-VueSFC',
     version=version,
     url='https://github.com/michaelbukachi/flask_vue_sfc',
     license='Apache',
@@ -41,7 +41,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Flask',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
