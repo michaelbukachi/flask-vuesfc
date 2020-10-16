@@ -11,7 +11,7 @@ except:
 
 import codecs
 
-version = '0.0.1'
+version = '0.0.3'
 
 setup(
     name='Flask-Vue-SFC',
@@ -30,7 +30,7 @@ setup(
         'Flask>=0.11',
         'py-mini-racer>=0.4.0',
         'tinycss2>=1.0.2',
-        'esprima>=4.0.2',
+        'esprima>=4.0.1',
         'css-html-js-minify'
     ],
     setup_requires=['pytest-runner'],
