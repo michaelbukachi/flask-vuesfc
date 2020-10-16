@@ -11,13 +11,13 @@ except:
 
 import codecs
 
-version = '0.0.5'
+version = '0.0.6'
 
 setup(
     name='Flask-VueSFC',
     version=version,
     url='https://github.com/michaelbukachi/flask-vuesfc',
-    license='Apache',
+    license='MIT',
     author='Michael Bukachi',
     author_email='michaelbukachi@gmail.com',
     description='Flask extension for rendering Vue.js SFCs',
