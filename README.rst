@@ -1,6 +1,14 @@
 ===============
 Flask-Vue-SFC
 ===============
+.. image:: https://img.shields.io/pypi/v/Flask-Vue-SFC.svg
+    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
+.. image:: https://img.shields.io/pypi/l/Flask-Vue.svg
+    :target: https://pypi.python.org/pypi/Flask-Vue-SFC
+.. image:: https://img.shields.io/pypi/pyversions/Flask-Vue-SFC.svg
+    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
+.. image:: https://img.shields.io/pypi/status/Flask-Vue-SFC.svg
+    :target: https://pypi.python.org/pypi/Flask-Vue-SFC/
 
 Flask-Vue-SFC is a Flask extension that translates and renders `Vue.js
 <http://vuejs.org>`_ Single File Components.
@@ -130,7 +138,7 @@ was usage of Vue.js as library instead of a framework. The latter pattern is bec
 Organizing Vue.js code becomes quite problematic due to the fact there's conventional way of organizing code when it's not
 being used as a framework. Perhaps this is because it's all dependent on the backend framework being used and it's conventions.
 
-Then it dawned unto me. What if devs could work with single file components directly without having to deal with webpack??? :astonished:
+Then it dawned unto me. What if devs could work with single file components directly without having to deal with webpack???
 
 ==============
 Contributions
