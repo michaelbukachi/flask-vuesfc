@@ -11,12 +11,12 @@ except:
 
 import codecs
 
-version = '0.0.4'
+version = '0.0.5'
 
 setup(
     name='Flask-VueSFC',
     version=version,
-    url='https://github.com/michaelbukachi/flask_vue_sfc',
+    url='https://github.com/michaelbukachi/flask-vuesfc',
     license='Apache',
     author='Michael Bukachi',
     author_email='michaelbukachi@gmail.com',
