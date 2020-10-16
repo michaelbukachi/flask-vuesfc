@@ -11,7 +11,7 @@ except:
 
 import codecs
 
-version = '0.0.6'
+version = '0.0.7'
 
 setup(
     name='Flask-VueSFC',
@@ -35,7 +35,7 @@ setup(
     ],
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
-    python_requires='>=3.4',
+    python_requires='>=3.6',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
