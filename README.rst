@@ -92,7 +92,7 @@ Usage
 Here's an example on how to use the extension ::
 
   from flask_vue_sfc import VueSFC
-  from flask_vue_sfc.helpers import render_vue_component
+  from flask_vue_sfc.helpers import render_vue_component, render_vue_page
 
   def create_app():
       app = Flask(__name__)
@@ -103,6 +103,10 @@ Here's an example on how to use the extension ::
       def example1():
           component = render_vue_component('index.vue')
           return render_template('example.html', component=component)
+
+      @app.route('/example2')
+      def example2():
+          return render_vue_page('index.vue')
 
 Since ``render_vue_component`` returns html syntax we need to make sure **jinja** doesn't try to
 escape it. So be sure to always use the ``safe`` filter when rendering the component like so ::
