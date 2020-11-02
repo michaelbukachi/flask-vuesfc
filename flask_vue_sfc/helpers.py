@@ -1,4 +1,5 @@
 import secrets
+from functools import lru_cache
 
 from flask import render_template
 from flask.globals import _app_ctx_stack
@@ -25,6 +26,7 @@ def _load_template(template_name):
     return component
 
 
+@lru_cache(maxsize=128)
 def _render_component(template_name):
     ctx = _app_ctx_stack.top
     src = _load_template(template_name)
