@@ -137,7 +137,7 @@ There are configuration options used by Flask-Vue-SFC.
 |VUE_SERVE_LOCAL     | False            |If True, scripts will be served from the local instance.                    |
 +--------------------+------------------+----------------------------------------------------------------------------+
 
-**Note:** if ``VUE_PROD_MODE`` is set to ``True``, a ``cache`` instance has to be provided when initializing the app. Check
+**Note:** if ``VUE_PROD_MODE`` is set to ``True``, a ``cache`` instance has to be provided when initializing the extension. Check
 the examples folder for a sample.
 
 
