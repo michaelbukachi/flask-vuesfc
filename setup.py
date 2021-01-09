@@ -11,7 +11,7 @@ except:
 
 import codecs
 
-version = '0.0.7'
+version = '0.0.8'
 
 setup(
     name='Flask-VueSFC',

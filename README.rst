@@ -127,13 +127,23 @@ Configuration
 --------------
 There are configuration options used by Flask-Vue-SFC.
 
-+--------------------+------------------+--------------------------------------------------------------------+
-|Option              | Default          |                                                                    |
-+====================+==================+====================================================================+
-|VUE_USE_MINIFIED    | True             |Whether or not to use the minified scripts.                         |
-+--------------------+------------------+--------------------------------------------------------------------+
-|VUE_SERVE_LOCAL     | False            |If True, scripts will be served from the local instance.            |
-+--------------------+------------------+--------------------------------------------------------------------+
++--------------------+------------------+----------------------------------------------------------------------------+
+|Option              | Default          |                                                                            |
++====================+==================+============================================================================+
+|VUE_USE_MINIFIED    | True             |Whether or not to use the minified scripts.                                 |
++--------------------+------------------+----------------------------------------------------------------------------+
+|VUE_PROD_MODE       | False            |If True, vue components will be rendered when the extension is initialized. |            |
++--------------------+------------------+----------------------------------------------------------------------------+
+|VUE_SERVE_LOCAL     | False            |If True, scripts will be served from the local instance.                    |
++--------------------+------------------+----------------------------------------------------------------------------+
+
+**Note:** if ``VUE_PROD_MODE`` is set to ``True``, a ``cache`` instance has to be provided when initializing the app. Check
+the examples folder for a sample.
+
+
+A  ``cache`` instance MUST have the methods:
+ - ``.get(key)``
+ - ``.set(key, value, expires=None)``
 
 
 ==============================

@@ -1,3 +1,4 @@
+import glob
 import os
 
 from flask import g, Blueprint, current_app, url_for
@@ -12,11 +13,15 @@ STATIC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'static')
 
 class VueSFC:
 
-    def __init__(self, app=None):
+    def __init__(self, app=None, cache=None):
+        self.cache = cache
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app):
+    def init_app(self, app, cache=None):
+        if cache is not None:
+            self.cache = cache
+
         if not hasattr(app, 'extensions'):
             app.extensions = {}
         app.extensions['vue_sfc'] = self
@@ -30,10 +35,15 @@ class VueSFC:
         app.config.setdefault('VUE_SERVE_LOCAL', False)
         app.config.setdefault('VUE_USE_MINIFIED', True)
 
-        app.jinja_loader = VueLoader(os.path.join(app.root_path, app.template_folder))
+        templates_folder = os.path.join(app.root_path, app.template_folder)
+
+        app.jinja_loader = VueLoader(templates_folder)
 
         @app.before_request
         def before_request_func():
+            if self.cache and 'sfc_cache' not in g:
+                g.sfc_cache = self.cache
+
             if 'v8' not in g:
                 g.v8 = py_mini_racer.MiniRacer()
 
@@ -43,8 +53,28 @@ class VueSFC:
             g.v8.eval(_get_file_contents(escodegen_filepath))
 
         @app.teardown_appcontext
-        def teardown_v8_engine(exc):
-            g.pop('v8', None)
+        def teardown(exc):
+            if 'sfc_cache' in g:
+                g.pop('sfc_cache')
+
+            g.pop('v8')
+
+        if app.config.setdefault('VUE_PROD_MODE', False):
+            if self.cache is None:
+                raise RuntimeError('A cache strategy is required if "VUE_PROD_MODE" is True')
+
+            from flask_vue_sfc.helpers import render_vue_component
+            # Get all vue components in templates folder and pre-render them
+            with app.app_context():
+                g.v8 = py_mini_racer.MiniRacer()
+                vue_tc_filepath = os.path.join(STATIC_DIR, 'js', 'vue-template-compiler.js')
+                g.v8.eval(_get_file_contents(vue_tc_filepath))
+                escodegen_filepath = os.path.join(STATIC_DIR, 'js', 'escodegen.js')
+                g.v8.eval(_get_file_contents(escodegen_filepath))
+
+                for filename in glob.iglob(templates_folder + '**/*.vue', recursive=True):
+                    vue_file = filename.replace(templates_folder + '/', '')
+                    render_vue_component(vue_file)
 
     @staticmethod
     def load_js(version=VERSION_VUE):
