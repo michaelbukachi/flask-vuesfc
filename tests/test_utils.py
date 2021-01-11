@@ -1,4 +1,4 @@
-from flask_vue_sfc.utils import VueComponent, VueChildComponent, SFC
+from flask_vue_sfc.utils import VueComponent, VueChildComponent, SFC, _change_delimiters
 
 
 def test_render_html():
@@ -185,3 +185,9 @@ def test_render_sfc__with_child():
         "</style>\n"
     )
     assert str(sfc) == expected
+
+
+def test_change_delimiters__escape_syntax():
+    expected = '{{ test }}'
+    html = _change_delimiters('{{{ test }}}')
+    assert expected == html

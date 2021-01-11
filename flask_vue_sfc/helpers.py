@@ -10,10 +10,11 @@ def _create_random_id():
     return 'vue-sfc-' + secrets.token_hex(6)
 
 
-def _load_template(template_name):
+def _load_template(template_name, **context):
     ctx = _app_ctx_stack.top
+    ctx.app.update_template_context(context)
     t = ctx.app.jinja_env.get_or_select_template(template_name)
-    vue = t.render()
+    vue = t.render(context)
     parsed = ctx.g.v8.call('VueTemplateCompiler.parseComponent', vue)
 
     component = {
@@ -25,7 +26,7 @@ def _load_template(template_name):
     return component
 
 
-def _render_component(template_name):
+def _render_component(template_name, **context):
     ctx = _app_ctx_stack.top
 
     if 'sfc_cache' in ctx.g:
@@ -33,7 +34,7 @@ def _render_component(template_name):
         if sfc:
             return sfc
 
-    src = _load_template(template_name)
+    src = _load_template(template_name, **context)
     component = VueComponent(src, _create_random_id, _load_template)
     sfc = component.render(ctx.g.v8)
     sfc = str(sfc)
@@ -46,11 +47,12 @@ def _render_component(template_name):
 
 def render_vue_component(template_name, **context):
     is_page = context.get('is_page', False)
-    component = _render_component(template_name)
+    component = _render_component(template_name, **context)
     if is_page:
         return render_template('page.html', component=component)
     return component
 
 
-def render_vue_page(template_name):
-    return render_vue_component(template_name, is_page=True)
+def render_vue_page(template_name, **context):
+    context['is_page'] = True
+    return render_vue_component(template_name, **context)
