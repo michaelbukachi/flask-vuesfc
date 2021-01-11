@@ -122,6 +122,10 @@ escape it. So be sure to always use the ``safe`` filter when rendering the compo
 
 Feel free to checkout the examples folder for other examples.
 
+Styling
+-------
+Sass styling is supported, though this needs to be tested in a complex app to determine the extent.
+
 Escaping
 --------
 Occasionally, you might need a variable to be parsed by ``jinja`` instead of ``vue``. To achieve this, use triple
