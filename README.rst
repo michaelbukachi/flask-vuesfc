@@ -122,6 +122,13 @@ escape it. So be sure to always use the ``safe`` filter when rendering the compo
 
 Feel free to checkout the examples folder for other examples.
 
+Escaping
+--------
+Occasionally, you might need a variable to be parsed by ``jinja`` instead of ``vue``. To achieve this, use triple
+parenthesis i.e ``{{{ variable }}}``.
+
+Checkout **examples/app_with_escaping.py**.
+
 --------------
 Configuration
 --------------

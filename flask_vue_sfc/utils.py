@@ -17,7 +17,9 @@ class VueLoader(FileSystemLoader):
         if template and template.lower().endswith('.vue'):
             # We don't want jinja to touch  {{ }}
             contents, filename, uptodate = super(VueLoader, self).get_source(environment, template)
-            contents = '{% raw %}\n' + contents.replace('</template>', '</template>\n{% endraw %}')
+            contents = _change_delimiters(contents)
+            # contents = '{% raw %}\n' + contents.replace('</template>', '</template>\n{% endraw %}')
+            # print(contents)
             return contents, filename, uptodate
         return super(VueLoader, self).get_source(environment, template)
 
@@ -234,10 +236,8 @@ class HtmlTemplate:
         )
         html = html_minify(html)
         # Handler delimiters replacement to prevent conflicts with jinja
-        if '{{' in html:
-            html = html.replace('{{', '[[')
-            html = html.replace('}}', ']]')
         return html
+        # return _change_delimiters(html)
 
 
 class ChildHtmlTemplate(HtmlTemplate):
@@ -255,10 +255,8 @@ class ChildHtmlTemplate(HtmlTemplate):
         )
         html = html_minify(html)
         # Handler delimiters replacement to prevent conflicts with jinja
-        if '{{' in html:
-            html = html.replace('{{', '[[')
-            html = html.replace('}}', ']]')
         return html
+        # return _change_delimiters(html)
 
 
 class CssStyling:
@@ -330,3 +328,17 @@ class VueChildComponent(ChildVueScript, ChildHtmlTemplate, CssStyling):
 def _get_file_contents(path):
     with open(path, 'r') as fp:
         return fp.read()
+
+
+def _change_delimiters(html):
+    if '{{' in html:
+        html = html.replace('{{{', 'op_par')
+        html = html.replace('}}}', 'cl_par')
+
+        html = html.replace('{{', '[[')
+        html = html.replace('}}', ']]')
+
+        html = html.replace('op_par', '{{')
+        html = html.replace('cl_par', '}}')
+
+    return html
