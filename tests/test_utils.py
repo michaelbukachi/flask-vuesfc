@@ -22,6 +22,14 @@ def test_render_css():
     assert template.render_css() == '#1 .example{font-weight:bold}'
 
 
+def test_render_css__sass():
+    src = dict(html='<div class="example"><div class="inner">[[message]]</div></div>', script='',
+               styles=['.example {\n font-weight: bold;\n .inner {\n color: red;\n}}'])
+    template = VueComponent(src, lambda: 1)
+    template.app_id = '1'
+    assert template.render_css() == '#1 .example{font-weight:bold}#1 .example .inner{color:red}'
+
+
 def test_render_vue_component__no_child():
     script = '''
     export default {

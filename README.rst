@@ -127,7 +127,9 @@ Escaping
 Occasionally, you might need a variable to be parsed by ``jinja`` instead of ``vue``. To achieve this, use triple
 parenthesis i.e ``{{{ variable }}}``.
 
-Checkout **examples/app_with_escaping.py**.
+**Note:** Currently, escaping only supports root components.
+
+Checkout **examples/app_with_escaping.py** for a sample.
 
 --------------
 Configuration
