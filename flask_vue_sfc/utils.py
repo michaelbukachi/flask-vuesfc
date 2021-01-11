@@ -1,6 +1,7 @@
 import os
 
 import esprima
+import sass
 from css_html_js_minify import html_minify, css_minify
 from esprima.nodes import Module, ExportDefaultDeclaration, Property, ImportDeclaration, Identifier, Literal, \
     ExpressionStatement, NewExpression, CallExpression, StaticMemberExpression, ArrayExpression
@@ -270,10 +271,10 @@ class CssStyling:
     def render_css(self):
         final_css = ''
         for style in self.styles:
+            style = sass.compile(string=style) # Handle sass
             rules = parse_stylesheet(style, True, True)
             for rule in rules:
                 final_css += (f'{self.styling_prefix} ' + rule.serialize() + '\n')
-
         return css_minify(final_css, noprefix=True)
 
 
