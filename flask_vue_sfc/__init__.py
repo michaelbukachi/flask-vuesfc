@@ -57,7 +57,8 @@ class VueSFC:
             if 'sfc_cache' in g:
                 g.pop('sfc_cache')
 
-            g.pop('v8')
+            if 'v8' in g:
+                g.pop('v8')
 
         if app.config.setdefault('VUE_PROD_MODE', False):
             if self.cache is None:
