@@ -76,11 +76,12 @@ class SFC:
 
 class VueScript:
 
-    def __init__(self, script, id_generator, child_component_loader=None, **kwargs):
+    def __init__(self, script, id_generator, child_component_loader=None, loader_context=None, **kwargs):
         super(VueScript, self).__init__(**kwargs)
         self.script = script
         self.id_generator = id_generator
         self.child_component_loader = child_component_loader
+        self.loader_context = loader_context
         self.parsed: Module = esprima.parseModule(script)
         self.imports = {}
         self.app_id = None
@@ -280,9 +281,10 @@ class CssStyling:
 
 class VueComponent(VueScript, HtmlTemplate, CssStyling):
 
-    def __init__(self, src, id_generator, child_component_loader=None):
+    def __init__(self, src, id_generator, child_component_loader=None, loader_context=None):
         super(VueComponent, self).__init__(html=src.get('html'), script=src.get('script'), styles=src.get('styles'),
-                                           id_generator=id_generator, child_component_loader=child_component_loader)
+                                           id_generator=id_generator, child_component_loader=child_component_loader,
+                                           loader_context=loader_context)
         self.app_id = id_generator()
         self.styling_prefix = f'#{self.app_id}'
 
@@ -292,7 +294,11 @@ class VueComponent(VueScript, HtmlTemplate, CssStyling):
         if components:
             children = []
             for key, val in components.items():
-                src = self.child_component_loader(val)
+                if not self.loader_context:
+                    context = {}
+                else:
+                    context = self.loader_context
+                src = self.child_component_loader(val, **context)
                 child = VueChildComponent(key, src, self.id_generator, self.child_component_loader, self.styling_prefix)
                 children.append(child.render(v8))
         html = self.render_html()

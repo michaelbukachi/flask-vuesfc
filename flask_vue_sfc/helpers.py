@@ -35,7 +35,7 @@ def _render_component(template_name, **context):
             return sfc
 
     src = _load_template(template_name, **context)
-    component = VueComponent(src, _create_random_id, _load_template)
+    component = VueComponent(src, _create_random_id, _load_template, context)
     sfc = component.render(ctx.g.v8)
     sfc = str(sfc)
 
