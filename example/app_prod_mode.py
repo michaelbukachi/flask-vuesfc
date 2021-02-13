@@ -4,21 +4,6 @@ from flask_vue_sfc import VueSFC
 from flask_vue_sfc.helpers import render_vue_component, render_vue_page
 
 
-class Cache(object):
-    def __init__(self):
-        self._data = {}
-
-    def get(self, k):
-        return self._data.get(k)
-
-    def set(self, k, v, timeout=None):
-        self._data[k] = v
-
-    def delete(self, k):
-        if k in self._data:
-            del self._data[k]
-
-
 class Config:
     SECRET_KEY = 'some-very-long-secret'
     VUE_PROD_MODE = True
@@ -28,7 +13,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    VueSFC(app, Cache())
+
+    VueSFC(app)
 
     @app.route('/')
     def index():

@@ -4,3 +4,4 @@ venv
 build
 dist
 .eggs
+*.sfc.html

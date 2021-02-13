@@ -29,23 +29,22 @@ def _load_template(template_name, **context):
 def _render_component(template_name, **context):
     ctx = _app_ctx_stack.top
 
-    if 'sfc_cache' in ctx.g:
-        sfc = ctx.g.sfc_cache.get(template_name)
-        if sfc:
-            return sfc
-
     src = _load_template(template_name, **context)
     component = VueComponent(src, _create_random_id, _load_template, context)
     sfc = component.render(ctx.g.v8)
     sfc = str(sfc)
-
-    if 'sfc_cache' in ctx.g:
-        ctx.g.sfc_cache.set(template_name, sfc)
-
     return sfc
 
 
+def get_compiled_name(name):
+    return name.replace('.vue', '.sfc.html')
+
+
 def render_vue_component(template_name, **context):
+    ctx = _app_ctx_stack.top
+    if 'building' not in ctx.g and ctx.app.config['VUE_PROD_MODE']:
+        return render_template(get_compiled_name(template_name), **context)
+
     is_page = context.get('is_page', False)
     component = _render_component(template_name, **context)
     if is_page:

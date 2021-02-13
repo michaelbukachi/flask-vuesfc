@@ -143,15 +143,14 @@ There are configuration options used by Flask-Vue-SFC.
 +====================+==================+=============================================================================+
 |VUE_USE_MINIFIED    | True             | Whether or not to use the minified scripts.                                 |
 +--------------------+------------------+-----------------------------------------------------------------------------+
-|VUE_PROD_MODE       | False            | If True, Vue components will be rendered when the extension is initialized. |
+|VUE_PROD_MODE       | False            | If True, Vue components won't be rendered at runtime.                       |
 +--------------------+------------------+-----------------------------------------------------------------------------+
 |VUE_SERVE_LOCAL     | False            | If True, scripts will be served from the local instance.                    |
 +--------------------+------------------+-----------------------------------------------------------------------------+
 
 
-A  ``cache`` instance MUST have the methods:
- - ``.get(key)``
- - ``.set(key, value, expires=None)``
+When ``VUE_PROD_MODE`` is set to True, all Vue components are rendered from **.sfc.html** files.
+In order to produce these files, run **flask vue build** before starting your app.
 
 
 ==============================
